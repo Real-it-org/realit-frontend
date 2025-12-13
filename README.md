@@ -1,1 +1,1 @@
-# realit-frontend
+This is a Social media platform
