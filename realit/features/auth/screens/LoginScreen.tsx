@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { AuthInput } from '../components/AuthInput';
 import { Button } from '../../../components/Button';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 
 export const LoginScreen = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign in</Text>
@@ -17,7 +20,12 @@ export const LoginScreen = () => {
 
       <Text style={styles.signupText}>
         Don’t have an account?{' '}
-        <Text style={styles.signupLink}>SignUp</Text>
+        <Text
+          style={styles.signupLink}
+          onPress={() => router.push('/signup')}
+        >
+          SignUp
+        </Text>
       </Text>
 
       <TouchableOpacity style={styles.googleButton}>
@@ -26,6 +34,7 @@ export const LoginScreen = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
