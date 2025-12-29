@@ -5,12 +5,17 @@ import { spacing } from '../theme/spacing';
 
 interface Props {
   title: string;
-  onPress: () => void;
+  onPress?: () => void;
+  disabled?: boolean;
 }
 
-export const Button: React.FC<Props> = ({ title, onPress }) => {
+export const Button: React.FC<Props> = ({ title, onPress, disabled }) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.button, disabled && styles.disabled]}
+      onPress={onPress}
+      disabled={disabled}
+    >
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
@@ -28,5 +33,8 @@ const styles = StyleSheet.create({
     color: colors.buttonTextDark,
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabled: {
+    opacity: 0.6,
   },
 });

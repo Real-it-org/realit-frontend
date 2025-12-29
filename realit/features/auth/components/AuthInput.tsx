@@ -6,11 +6,15 @@ import { spacing } from '../../../theme/spacing';
 interface Props {
   placeholder: string;
   secureTextEntry?: boolean;
+  value?: string;
+  onChangeText?: (text: string) => void;
 }
 
 export const AuthInput: React.FC<Props> = ({
   placeholder,
   secureTextEntry,
+  value,
+  onChangeText,
 }) => {
   return (
     <TextInput
@@ -18,6 +22,8 @@ export const AuthInput: React.FC<Props> = ({
       placeholderTextColor={colors.textSecondary}
       secureTextEntry={secureTextEntry}
       style={styles.input}
+      value={value}
+      onChangeText={onChangeText}
     />
   );
 };

@@ -1,27 +1,102 @@
 import { router } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import { Button } from '../../../components/Button';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 import { AuthInput } from '../components/AuthInput';
 
 export const SignupScreen = () => {
-  const handleSignup = () => {
-    router.push('/confirmation');
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async () => {
+    if (!username || !displayName || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // NOTE: Ensure BACKEND_API_URL is set in your .env or Environment
+      const apiUrl = process.env.BACKEND_API_URL || 'http://10.0.2.2:3000';
+
+      const response = await fetch(`${apiUrl}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          username,
+          display_name: displayName,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
+
+      Alert.alert('Success', 'Account created successfully!', [
+        { text: 'OK', onPress: () => router.push('/confirmation') }
+      ]);
+
+    } catch (error: any) {
+      Alert.alert('Signup Error', error.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
 
-      <AuthInput placeholder="Username" />
-      <AuthInput placeholder="Display Name" />
-      <AuthInput placeholder="Email" />
-      <AuthInput placeholder="Password" secureTextEntry />
-      <AuthInput placeholder="Confirm Password" secureTextEntry />
+      <AuthInput
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <AuthInput
+        placeholder="Display Name"
+        value={displayName}
+        onChangeText={setDisplayName}
+      />
+      <AuthInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <AuthInput
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <AuthInput
+        placeholder="Confirm Password"
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
 
-      <Button title="Sign up" onPress={handleSignup} />
+      <Button
+        title={loading ? "Signing up..." : "Sign up"}
+        onPress={handleSignup}
+        disabled={loading}
+      />
     </View>
   );
 };
