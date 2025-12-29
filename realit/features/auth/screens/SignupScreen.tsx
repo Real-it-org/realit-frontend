@@ -15,6 +15,8 @@ export const SignupScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
 
+      <AuthInput placeholder="Username" />
+      <AuthInput placeholder="Display Name" />
       <AuthInput placeholder="Email" />
       <AuthInput placeholder="Password" secureTextEntry />
       <AuthInput placeholder="Confirm Password" secureTextEntry />
