@@ -8,15 +8,74 @@ import { spacing } from '../../../theme/spacing';
 
 export const LoginScreen = () => {
   const router = useRouter();
+  const [identifier, setIdentifier] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleLogin = async () => {
+    if (!identifier || !password) {
+      // TODO: Add proper error handling/alert
+      alert('Please fill in all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // NOTE: Ensure EXPO_PUBLIC_BACKEND_API_URL is set in your .env
+      const apiUrl = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.200:3000';
+
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // TODO: Store tokens securely (e.g., using Expo SecureStore)
+      console.log('Login successful:', data);
+      alert('Login successful!');
+
+      // Navigate to home or dashboard after successful login
+      // router.replace('/(tabs)/home'); 
+
+    } catch (error: any) {
+      alert(error.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign in</Text>
 
-      <AuthInput placeholder="Email" />
-      <AuthInput placeholder="Password" secureTextEntry />
+      <AuthInput
+        placeholder="Email or Username"
+        value={identifier}
+        onChangeText={setIdentifier}
+      />
+      <AuthInput
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
 
-      <Button title="Login" onPress={() => {}} />
+      <Button
+        title={loading ? "Logging in..." : "Login"}
+        onPress={handleLogin}
+        disabled={loading}
+      />
 
       <Text style={styles.signupText}>
         Don’t have an account?{' '}
