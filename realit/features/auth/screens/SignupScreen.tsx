@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Alert } from 'react-native';
 import { Button } from '../../../components/Button';
+import { validatePassword, doPasswordsMatch } from '@/features/auth/utils/validation';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 import { AuthInput } from '../components/AuthInput';
@@ -20,15 +21,21 @@ export const SignupScreen = () => {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (!doPasswordsMatch(password, confirmPassword)) {
       Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    const validationResult = validatePassword(password);
+    if (!validationResult.isValid) {
+      Alert.alert('Invalid Password', validationResult.error);
       return;
     }
 
     try {
       setLoading(true);
-      // NOTE: Ensure BACKEND_API_URL is set in your .env or Environment
-      const apiUrl = process.env.BACKEND_API_URL || 'http://10.0.2.2:3000';
+      // NOTE: Ensure EXPO_PUBLIC_BACKEND_API_URL is set in your .env
+      const apiUrl = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.200:3000';
 
       const response = await fetch(`${apiUrl}/auth/signup`, {
         method: 'POST',
