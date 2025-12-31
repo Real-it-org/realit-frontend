@@ -5,4 +5,7 @@ export const colors = {
   inputBg: '#4A4A4A',
   buttonPrimary: '#E5E5E5',
   buttonTextDark: '#000000',
+  buttonPost: '#9B99E9',    // Purple/Lavender
+  buttonRealIt: '#86CC48',  // Green
+  buttonGenie: '#FFC107',   // Yellow
 };

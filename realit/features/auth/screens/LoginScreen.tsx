@@ -46,7 +46,7 @@ export const LoginScreen = () => {
       alert('Login successful!');
 
       // Navigate to home or dashboard after successful login
-      // router.replace('/(tabs)/home'); 
+      router.replace('/feed');
 
     } catch (error: any) {
       alert(error.message || 'An unexpected error occurred');
