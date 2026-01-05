@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { authService } from '@/services/auth/auth.service';
 import { useRouter } from 'expo-router';
 import { AuthInput } from '../components/AuthInput';
 import { Button } from '../../../components/Button';
@@ -21,35 +22,19 @@ export const LoginScreen = () => {
 
     try {
       setLoading(true);
-      // NOTE: Ensure EXPO_PUBLIC_BACKEND_API_URL is set in your .env
-      const apiUrl = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.200:3000';
 
-      const response = await fetch(`${apiUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          identifier,
-          password,
-        }),
+      await authService.login({
+        identifier,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // TODO: Store tokens securely (e.g., using Expo SecureStore)
-      console.log('Login successful:', data);
-      alert('Login successful!');
-
+      console.log('Login successful');
       // Navigate to home or dashboard after successful login
       router.replace('/feed');
 
     } catch (error: any) {
-      alert(error.message || 'An unexpected error occurred');
+      const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+      alert(message);
     } finally {
       setLoading(false);
     }

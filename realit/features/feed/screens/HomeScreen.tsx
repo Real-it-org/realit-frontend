@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, SafeAreaView, Platform, StatusBar } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet, FlatList, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { FeedPost } from '../components/FeedPost';
-import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { CustomHeader } from '../components/CustomHeader';
+import { CustomBottomBar } from '../components/CustomBottomBar';
 import { usePreventScreenCapture } from '@/hooks/usePreventScreenCapture';
 
 // Mock Data
@@ -42,6 +41,12 @@ const MOCK_POSTS = [
 
 export const HomeScreen = () => {
     usePreventScreenCapture();
+
+    // Handlers (Placeholders)
+    const handleLike = (id: string) => console.log('Like', id);
+    const handleShare = (id: string) => console.log('Share', id);
+    const handleComment = (id: string) => console.log('Comment', id);
+
     const renderItem = ({ item }: { item: any }) => (
         <FeedPost
             heading={item.heading}
@@ -51,27 +56,18 @@ export const HomeScreen = () => {
             shares={item.shares}
             comments={item.comments}
             description={item.description}
+            onLikePress={() => handleLike(item.id)}
+            onSharePress={() => handleShare(item.id)}
+            onCommentPress={() => handleComment(item.id)}
         />
     );
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" />
-            {/* Top Header */}
-            <View style={styles.header}>
-                <TouchableOpacity>
-                    <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Ionicons name="search-outline" size={24} color={colors.textPrimary} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Ionicons name="person-outline" size={24} color={colors.textPrimary} />
-                </TouchableOpacity>
-            </View>
+            <StatusBar barStyle="light-content" backgroundColor="#000" />
+
+            {/* Custom Header - Pass true/false to toggle notification badge */}
+            <CustomHeader hasNotifications={true} />
 
             {/* Feed List */}
             <FlatList
@@ -82,18 +78,8 @@ export const HomeScreen = () => {
                 showsVerticalScrollIndicator={false}
             />
 
-            {/* Bottom Buttons */}
-            <View style={styles.bottomBar}>
-                <TouchableOpacity style={[styles.bottomButton, { backgroundColor: colors.buttonPost }]}>
-                    <Text style={styles.buttonText}>Post</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.bottomButton, { backgroundColor: colors.buttonRealIt }]}>
-                    <Text style={styles.buttonText}>Real-it</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.bottomButton, { backgroundColor: colors.buttonGenie }]}>
-                    <Text style={styles.buttonText}>Genie</Text>
-                </TouchableOpacity>
-            </View>
+            {/* Custom Bottom Bar */}
+            <CustomBottomBar />
         </SafeAreaView>
     );
 };
@@ -102,38 +88,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#000000',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
-        backgroundColor: '#000000',
-        borderBottomWidth: 1,
-        borderBottomColor: '#222',
     },
     feedContent: {
-        paddingBottom: 80, // Space for bottom bar
-    },
-    bottomBar: {
-        flexDirection: 'row',
-        height: 60,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    bottomButton: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: '#000000',
-        fontSize: 18,
-        fontWeight: 'bold',
-        fontFamily: 'serif',
-        fontStyle: 'italic', // Matching the cursive/italic look in the screenshot
+        paddingBottom: 110, // Increased space for the taller CustomBottomBar
     },
 });
