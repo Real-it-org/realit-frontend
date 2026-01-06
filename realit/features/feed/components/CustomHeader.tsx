@@ -5,11 +5,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
+import { useRouter } from 'expo-router';
+
 interface CustomHeaderProps {
     hasNotifications?: boolean;
 }
 
 export const CustomHeader: React.FC<CustomHeaderProps> = ({ hasNotifications = false }) => {
+    const router = useRouter();
     return (
         <View style={styles.container}>
             <LinearGradient
@@ -37,7 +40,10 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ hasNotifications = f
                 </TouchableOpacity>
 
                 {/* 4. Profile Picture - Rounded with glow (Default/Empty initially) */}
-                <TouchableOpacity style={styles.profileContainer}>
+                <TouchableOpacity
+                    style={styles.profileContainer}
+                    onPress={() => router.push('/profile')}
+                >
                     <View style={[styles.profileImage, styles.emptyProfile]}>
                         <Ionicons name="person" size={20} color="#666" />
                     </View>

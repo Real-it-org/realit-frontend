@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { View, StyleSheet, FlatList, Platform, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FeedPost } from '../components/FeedPost';
 import { CustomHeader } from '../components/CustomHeader';
 import { CustomBottomBar } from '../components/CustomBottomBar';
