@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Alert } from 'react-native';
 import { Button } from '../../../components/Button';
+import { BackButton } from '../../../components/BackButton';
 import { validatePassword, doPasswordsMatch } from '@/features/auth/utils/validation';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
@@ -69,6 +70,8 @@ export const SignupScreen = () => {
 
   return (
     <View style={styles.container}>
+      <BackButton style={styles.backButton} />
+
       <Text style={styles.title}>Create Account</Text>
 
       <AuthInput
@@ -114,6 +117,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     padding: spacing.lg,
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: spacing.xl,
+    left: spacing.lg,
+    zIndex: 1,
   },
   title: {
     color: colors.textPrimary,
