@@ -5,7 +5,10 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { GradientButton } from '@/components/GradientButton';
 import { spacing } from '@/theme/spacing';
 
+import { useRouter } from 'expo-router';
+
 export const CustomBottomBar = () => {
+    const router = useRouter();
     return (
         <View style={styles.container}>
             {/* Background Gradient for the bar itself */}
@@ -33,6 +36,7 @@ export const CustomBottomBar = () => {
                         label="Real-it"
                         style={styles.button}
                         labelStyle={{ fontSize: 16 }}
+                        onPress={() => router.push('/camera')}
                     />
                 </View>
 
