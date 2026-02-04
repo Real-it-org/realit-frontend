@@ -24,7 +24,7 @@ export const PostGrid: React.FC<PostGridProps> = ({
     const renderItem = ({ item }: { item: PostResponse }) => (
         <View style={styles.itemContainer}>
             <Image
-                source={{ uri: item.media_url }}
+                source={{ uri: item.media?.[0]?.media_url }}
                 style={styles.image}
                 resizeMode="cover"
             />

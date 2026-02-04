@@ -229,8 +229,10 @@ export default function SecureGalleryScreen() {
             return;
         }
 
-        console.log("Posting items:", itemsToPost);
-        Alert.alert("Post", `Ready to post ${itemsToPost.length} item(s). \n(Backend integration pending)`);
+        router.push({
+            pathname: '/post-creation',
+            params: { images: JSON.stringify(itemsToPost) }
+        } as any);
     };
 
     const openViewer = (index: number) => {

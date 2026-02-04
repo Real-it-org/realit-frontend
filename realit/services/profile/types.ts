@@ -12,13 +12,17 @@ export interface ProfileResponse {
 
 export interface PostResponse {
     id: number;
-    caption: string;
-    media_url: string;
-    media_type: 'IMAGE' | 'VIDEO'; // Assuming enum based on common patterns, or string to be safe
+    heading: string;
+    description: string;
+    media: {
+        media_url: string;
+        media_type: 'image' | 'video';
+        position: number;
+    }[];
     verification_status: string;
     likes_count: number;
     comments_count: number;
-    created_at: string; // Serialized date
+    created_at: string;
 }
 
 export interface PaginationQuery {
