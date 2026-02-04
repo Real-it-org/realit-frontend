@@ -35,7 +35,7 @@ export const SignupScreen = () => {
     try {
       setLoading(true);
       // NOTE: Ensure EXPO_PUBLIC_BACKEND_API_URL is set in your .env
-      const apiUrl = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.200:3000';
+      const apiUrl = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.247:3000';
 
       const response = await fetch(`${apiUrl}/auth/signup`, {
         method: 'POST',
