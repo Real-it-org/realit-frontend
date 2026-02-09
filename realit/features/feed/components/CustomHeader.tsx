@@ -35,7 +35,10 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ hasNotifications = f
                 </TouchableOpacity>
 
                 {/* 3. Search Icon - Blue/Glassy */}
-                <TouchableOpacity style={styles.iconButton}>
+                <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => router.push('/search')}
+                >
                     <Ionicons name="search" size={28} color="#64B5F6" style={styles.glowIcon} />
                 </TouchableOpacity>
 

@@ -6,6 +6,7 @@ import { BackButton } from '../../../components/BackButton';
 import { validatePassword, doPasswordsMatch } from '@/features/auth/utils/validation';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
+import { authService } from '../../../services/auth/auth.service';
 import { AuthInput } from '../components/AuthInput';
 
 export const SignupScreen = () => {
@@ -35,27 +36,13 @@ export const SignupScreen = () => {
 
     try {
       setLoading(true);
-      // NOTE: Ensure EXPO_PUBLIC_BACKEND_API_URL is set in your .env
-      const apiUrl = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.200:3000';
-
-      const response = await fetch(`${apiUrl}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          username,
-          display_name: displayName,
-          password,
-        }),
+      // Use the centralized authService which uses the configured client
+      await authService.signup({
+        email,
+        username,
+        displayName: displayName,
+        password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
-      }
 
       Alert.alert('Success', 'Account created successfully!', [
         { text: 'OK', onPress: () => router.push('/confirmation') }
