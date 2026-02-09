@@ -2,9 +2,8 @@ import axios from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './storage';
 import { router } from 'expo-router';
 
-// NOTE: Ideally this comes from an environment variable (e.g. EXPO_PUBLIC_API_URL)
 // For now, using a default that matches the emulator or local network IP
-const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_API_URL || 'http://192.168.1.247:3000';
+const BASE_URL = process.env.BACKEND_API_URL || 'http://192.168.1.247:3000';
 
 export const client = axios.create({
     baseURL: BASE_URL,

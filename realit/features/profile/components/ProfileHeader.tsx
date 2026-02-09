@@ -8,9 +8,17 @@ import { spacing } from '@/theme/spacing';
 
 interface ProfileHeaderProps {
     profile: ProfileResponse;
+    isOwnProfile?: boolean;
+    isFollowing?: boolean;
+    onFollowPress?: () => void;
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+    profile,
+    isOwnProfile = true,
+    isFollowing = false,
+    onFollowPress
+}) => {
     const router = useRouter();
 
     return (
@@ -19,7 +27,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#FFF" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Profile Page</Text>
+                <Text style={styles.headerTitle}>{isOwnProfile ? 'My Profile' : profile.username}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -37,9 +45,20 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
                     <View style={styles.avatarRing} />
                 </View>
 
-                <TouchableOpacity style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>Edit Profile</Text>
-                </TouchableOpacity>
+                {isOwnProfile ? (
+                    <TouchableOpacity style={styles.actionButton}>
+                        <Text style={styles.actionButtonText}>Edit Profile</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={[styles.actionButton, isFollowing && styles.followingButton]}
+                        onPress={onFollowPress}
+                    >
+                        <Text style={[styles.actionButtonText, isFollowing && styles.followingButtonText]}>
+                            {isFollowing ? 'Following' : 'Follow'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
 
                 <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
@@ -155,5 +174,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: spacing.xl,
         marginTop: spacing.sm,
+    },
+    followingButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '#666',
+    },
+    followingButtonText: {
+        color: '#FFF',
     },
 });

@@ -21,20 +21,26 @@ export const PostGrid: React.FC<PostGridProps> = ({
     ListHeaderComponent
 }) => {
 
-    const renderItem = ({ item }: { item: PostResponse }) => (
-        <View style={styles.itemContainer}>
-            <Image
-                source={{ uri: item.media_url }}
-                style={styles.image}
-                resizeMode="cover"
-            />
-            {item.media_type === 'VIDEO' && (
-                <View style={styles.videoIcon}>
-                    <Ionicons name="play" size={16} color="#FFF" />
-                </View>
-            )}
-        </View>
-    );
+    const renderItem = ({ item }: { item: PostResponse }) => {
+        const firstMedia = item.media && item.media.length > 0 ? item.media[0] : null;
+
+        if (!firstMedia) return null;
+
+        return (
+            <View style={styles.itemContainer}>
+                <Image
+                    source={{ uri: firstMedia.media_url }}
+                    style={styles.image}
+                    resizeMode="cover"
+                />
+                {firstMedia.media_type === 'VIDEO' && (
+                    <View style={styles.videoIcon}>
+                        <Ionicons name="play" size={16} color="#FFF" />
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     const renderEmpty = () => {
         // Only show empty state if there is a header (profile loaded) but no posts

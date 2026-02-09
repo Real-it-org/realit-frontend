@@ -10,11 +10,22 @@ export interface ProfileResponse {
     posts_count: number;
 }
 
+export interface PublicProfileResponse extends ProfileResponse {
+    id: string;
+    is_following: boolean;
+}
+
+export interface PostMedia {
+    media_url: string;
+    media_type: 'IMAGE' | 'VIDEO'; // or MediaType enum
+    position: number;
+}
+
 export interface PostResponse {
     id: number;
-    caption: string;
-    media_url: string;
-    media_type: 'IMAGE' | 'VIDEO'; // Assuming enum based on common patterns, or string to be safe
+    heading?: string;
+    description?: string;
+    media: PostMedia[];
     verification_status: string;
     likes_count: number;
     comments_count: number;

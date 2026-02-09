@@ -70,9 +70,7 @@ export const SearchScreen = () => {
     const renderItem = ({ item }: { item: UserSummary }) => (
         <TouchableOpacity
             style={styles.userItem}
-            // TODO: Implement navigation to user profile when dynamic route is ready
-            // onPress={() => router.push(`/profile/${item.id}`)}
-            onPress={() => console.log('Navigate to user:', item.id)}
+            onPress={() => router.push(`/profile/${item.id}`)}
         >
             <View style={styles.avatarContainer}>
                 {item.avatar_url ? (
