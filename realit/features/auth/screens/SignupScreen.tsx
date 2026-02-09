@@ -36,7 +36,6 @@ export const SignupScreen = () => {
 
     try {
       setLoading(true);
-      // Use the centralized authService which uses the configured client
       await authService.signup({
         email,
         username,

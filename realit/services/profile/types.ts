@@ -29,7 +29,7 @@ export interface PostResponse {
     verification_status: string;
     likes_count: number;
     comments_count: number;
-    created_at: string; // Serialized date
+    created_at: string;
 }
 
 export interface PaginationQuery {
