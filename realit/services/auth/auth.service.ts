@@ -9,7 +9,11 @@ export * from '@/services/auth/types'; // Re-export types
 
 export const authService = {
     async signup(dto: SignupDto): Promise<AuthResponse> {
-        const response = await client.post<AuthResponse>('/auth/signup', dto);
+        const payload = {
+            ...dto,
+            display_name: dto.displayName,
+        };
+        const response = await client.post<AuthResponse>('/auth/signup', payload);
         const { access_token, refresh_token } = response.data;
         await setTokens(access_token, refresh_token);
         return response.data;
