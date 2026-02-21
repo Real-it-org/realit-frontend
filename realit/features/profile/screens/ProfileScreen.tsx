@@ -4,6 +4,7 @@ import { profileService } from '@/services/profile/profile.service';
 import { ProfileResponse, PostResponse, PublicProfileResponse } from '@/services/profile/types';
 import { ProfileHeader } from '../components/ProfileHeader';
 import { PostGrid } from '../components/PostGrid';
+import { PrivateAccountBanner } from '../components/PrivateAccountBanner';
 import { colors } from '@/theme/colors';
 
 interface ProfileScreenProps {
@@ -15,7 +16,11 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     const [posts, setPosts] = useState<PostResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isFollowing, setIsFollowing] = useState(false);
+
+    // isFollowing: true = following, false = not following, null = request sent (pending)
+    const [followState, setFollowState] = useState<boolean | 'requested'>(false);
+
+    const isOwnProfile = !userId;
 
     useEffect(() => {
         loadData();
@@ -27,19 +32,21 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             setError(null);
 
             if (userId) {
-                // Load public profile
                 const [profileData, postsData] = await Promise.all([
                     profileService.getPublicProfile(userId),
-                    profileService.getPublicUserPosts(userId)
+                    profileService.getPublicUserPosts(userId),
                 ]);
                 setProfile(profileData);
-                setPosts(postsData);
-                setIsFollowing(profileData.is_following);
+                setFollowState(profileData.is_following);
+
+                // Only load posts if public or already following
+                if (!profileData.is_private || profileData.is_following) {
+                    setPosts(postsData);
+                }
             } else {
-                // Load own profile
                 const [profileData, postsData] = await Promise.all([
                     profileService.getProfile(),
-                    profileService.getUserPosts()
+                    profileService.getUserPosts(),
                 ]);
                 setProfile(profileData);
                 setPosts(postsData);
@@ -56,38 +63,38 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     const handleFollowToggle = async () => {
         if (!userId || !profile) return;
 
+        const currentState = followState;
+
         // Optimistic update
-        const newIsFollowing = !isFollowing;
-        setIsFollowing(newIsFollowing);
-
-        // Update follower count locally
-        setProfile(prev => {
-            if (!prev) return null;
-            return {
-                ...prev,
-                followers_count: prev.followers_count + (newIsFollowing ? 1 : -1)
-            };
-        });
-
-        try {
-            if (newIsFollowing) {
-                await profileService.followUser(userId);
-            } else {
+        if (currentState === true) {
+            // Unfollow
+            setFollowState(false);
+            setProfile(prev => prev ? { ...prev, followers_count: prev.followers_count - 1 } : null);
+            try {
                 await profileService.unfollowUser(userId);
+            } catch {
+                setFollowState(true);
+                setProfile(prev => prev ? { ...prev, followers_count: prev.followers_count + 1 } : null);
             }
-        } catch (error) {
-            console.error('Failed to toggle follow:', error);
-            // Revert on error
-            setIsFollowing(!newIsFollowing);
-            setProfile(prev => {
-                if (!prev) return null;
-                return {
-                    ...prev,
-                    followers_count: prev.followers_count + (newIsFollowing ? -1 : 1)
-                };
-            });
-            alert('Failed to update follow status');
+        } else if (currentState === false) {
+            // Follow (may become 'requested' for private accounts)
+            const isPrivate = (profile as PublicProfileResponse).is_private;
+            if (isPrivate) {
+                setFollowState('requested');
+            } else {
+                setFollowState(true);
+                setProfile(prev => prev ? { ...prev, followers_count: prev.followers_count + 1 } : null);
+            }
+            try {
+                await profileService.followUser(userId);
+            } catch {
+                setFollowState(false);
+                if (!isPrivate) {
+                    setProfile(prev => prev ? { ...prev, followers_count: prev.followers_count - 1 } : null);
+                }
+            }
         }
+        // 'requested' state: tapping again does nothing (could cancel in future)
     };
 
     if (loading) {
@@ -106,19 +113,39 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
         );
     }
 
+    // Private profile guard: only applies when viewing someone else's private profile and NOT following
+    const isPrivateAndLocked =
+        !isOwnProfile &&
+        (profile as PublicProfileResponse).is_private &&
+        followState !== true;
+
+    const header = (
+        <ProfileHeader
+            profile={profile}
+            isOwnProfile={isOwnProfile}
+            followState={isOwnProfile ? true : followState}
+            onFollowPress={handleFollowToggle}
+        />
+    );
+
     return (
         <View style={styles.container}>
-            <PostGrid
-                posts={posts}
-                ListHeaderComponent={
-                    <ProfileHeader
-                        profile={profile}
-                        isOwnProfile={!userId}
-                        isFollowing={isFollowing}
-                        onFollowPress={handleFollowToggle}
-                    />
-                }
-            />
+            {isPrivateAndLocked ? (
+                <PostGrid
+                    posts={[]}
+                    ListHeaderComponent={
+                        <View>
+                            {header}
+                            <PrivateAccountBanner />
+                        </View>
+                    }
+                />
+            ) : (
+                <PostGrid
+                    posts={posts}
+                    ListHeaderComponent={header}
+                />
+            )}
         </View>
     );
 }

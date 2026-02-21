@@ -1,18 +1,20 @@
-import React from 'react';
-import { View, StyleSheet, FlatList, Platform, StatusBar } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, FlatList, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { FeedPost } from '../components/FeedPost';
 import { CustomHeader } from '../components/CustomHeader';
 import { CustomBottomBar } from '../components/CustomBottomBar';
 import { usePreventScreenCapture } from '@/hooks/usePreventScreenCapture';
+import { profileService } from '@/services/profile/profile.service';
 
 // Mock Data
 const MOCK_POSTS = [
     {
         id: '1',
         heading: 'Into the empty land...',
-        userAvatar: { uri: 'https://i.pravatar.cc/150?img=1' }, // Placeholder
-        postImage: { uri: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop' }, // Desert
+        userAvatar: { uri: 'https://i.pravatar.cc/150?img=1' },
+        postImage: { uri: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop' },
         likes: 50,
         shares: 10,
         comments: 5,
@@ -22,7 +24,7 @@ const MOCK_POSTS = [
         id: '2',
         heading: 'My Goa Trip',
         userAvatar: { uri: 'https://i.pravatar.cc/150?img=8' },
-        postImage: { uri: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000&auto=format&fit=crop' }, // Sunset/Person
+        postImage: { uri: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000&auto=format&fit=crop' },
         likes: 12,
         shares: 3,
         comments: 2,
@@ -32,7 +34,7 @@ const MOCK_POSTS = [
         id: '3',
         heading: 'Teacher Slapped',
         userAvatar: { uri: 'https://i.pravatar.cc/150?img=5' },
-        postImage: { uri: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1000&auto=format&fit=crop' }, // Classroom/School
+        postImage: { uri: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1000&auto=format&fit=crop' },
         likes: 102,
         shares: 45,
         comments: 89,
@@ -41,9 +43,19 @@ const MOCK_POSTS = [
 ];
 
 export const HomeScreen = () => {
-    usePreventScreenCapture();
+    usePreventScreenCapture(false);
 
-    // Handlers (Placeholders)
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useFocusEffect(
+        useCallback(() => {
+            // Re-fetch on every focus so the badge clears after visiting notifications
+            profileService.getProfile()
+                .then((p) => setUnreadCount(p.unread_notifications_count ?? 0))
+                .catch(() => { });
+        }, [])
+    );
+
     const handleLike = (id: string) => console.log('Like', id);
     const handleShare = (id: string) => console.log('Share', id);
     const handleComment = (id: string) => console.log('Comment', id);
@@ -67,10 +79,8 @@ export const HomeScreen = () => {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#000" />
 
-            {/* Custom Header - Pass true/false to toggle notification badge */}
-            <CustomHeader hasNotifications={true} />
+            <CustomHeader unreadCount={unreadCount} />
 
-            {/* Feed List */}
             <FlatList
                 data={MOCK_POSTS}
                 renderItem={renderItem}
@@ -79,7 +89,6 @@ export const HomeScreen = () => {
                 showsVerticalScrollIndicator={false}
             />
 
-            {/* Custom Bottom Bar */}
             <CustomBottomBar />
         </SafeAreaView>
     );
@@ -91,6 +100,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#000000',
     },
     feedContent: {
-        paddingBottom: 110, // Increased space for the taller CustomBottomBar
+        paddingBottom: 110,
     },
 });

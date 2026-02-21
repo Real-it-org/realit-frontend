@@ -9,16 +9,19 @@ import { spacing } from '@/theme/spacing';
 interface ProfileHeaderProps {
     profile: ProfileResponse;
     isOwnProfile?: boolean;
-    isFollowing?: boolean;
+    /** true = following, false = not following, 'requested' = pending request */
+    followState?: boolean | 'requested';
     onFollowPress?: () => void;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     profile,
     isOwnProfile = true,
-    isFollowing = false,
+    followState = false,
     onFollowPress
 }) => {
+    const isFollowing = followState === true;
+    const isRequested = followState === 'requested';
     const router = useRouter();
 
     return (
@@ -51,11 +54,20 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     </TouchableOpacity>
                 ) : (
                     <TouchableOpacity
-                        style={[styles.actionButton, isFollowing && styles.followingButton]}
-                        onPress={onFollowPress}
+                        style={[
+                            styles.actionButton,
+                            isFollowing && styles.followingButton,
+                            isRequested && styles.requestedButton,
+                        ]}
+                        onPress={isRequested ? undefined : onFollowPress}
+                        activeOpacity={isRequested ? 1 : 0.7}
                     >
-                        <Text style={[styles.actionButtonText, isFollowing && styles.followingButtonText]}>
-                            {isFollowing ? 'Following' : 'Follow'}
+                        <Text style={[
+                            styles.actionButtonText,
+                            isFollowing && styles.followingButtonText,
+                            isRequested && styles.requestedButtonText,
+                        ]}>
+                            {isFollowing ? 'Following' : isRequested ? 'Requested' : 'Follow'}
                         </Text>
                     </TouchableOpacity>
                 )}
@@ -182,5 +194,13 @@ const styles = StyleSheet.create({
     },
     followingButtonText: {
         color: '#FFF',
+    },
+    requestedButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '#444',
+    },
+    requestedButtonText: {
+        color: '#888',
     },
 });
