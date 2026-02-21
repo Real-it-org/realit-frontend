@@ -7,9 +7,13 @@ import { useCallback } from 'react';
  * A hook that prevents screen capture (screenshots and screen recording)
  * while the screen is focused.
  */
-export const usePreventScreenCapture = () => {
+export const usePreventScreenCapture = (enabled: boolean = true) => {
     useFocusEffect(
         useCallback(() => {
+            if (!enabled) {
+                return;
+            }
+
             const preventCapture = async () => {
                 try {
                     await ScreenCapture.preventScreenCaptureAsync();
@@ -24,7 +28,7 @@ export const usePreventScreenCapture = () => {
 
             preventCapture();
 
-            // Clean up when the screen loses focus or unmounts
+            // Clean up when the screen loses focus or unmounts or enabled becomes false
             return () => {
                 subscription.remove();
                 const allowCapture = async () => {
@@ -36,6 +40,6 @@ export const usePreventScreenCapture = () => {
                 };
                 allowCapture();
             };
-        }, [])
+        }, [enabled])
     );
 };

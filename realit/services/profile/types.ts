@@ -8,6 +8,7 @@ export interface ProfileResponse {
     followers_count: number;
     following_count: number;
     posts_count: number;
+    unread_notifications_count: number;
 }
 
 export interface PublicProfileResponse extends ProfileResponse {

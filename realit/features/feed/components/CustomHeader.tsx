@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, Platform, StatusBar } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, Platform, StatusBar, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
@@ -8,33 +8,40 @@ import { spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
 
 interface CustomHeaderProps {
-    hasNotifications?: boolean;
+    unreadCount?: number;
 }
 
-export const CustomHeader: React.FC<CustomHeaderProps> = ({ hasNotifications = false }) => {
+export const CustomHeader: React.FC<CustomHeaderProps> = ({ unreadCount = 0 }) => {
     const router = useRouter();
+    const hasNotifications = unreadCount > 0;
+
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={['#1a1a1a', '#000000']} // Dark gradient top to bottom
+                colors={['#1a1a1a', '#000000']}
                 style={styles.gradient}
             >
-                {/* 1. Settings Icon - Gold/Gear effect */}
+                {/* 1. Settings Icon */}
                 <TouchableOpacity style={styles.iconButton}>
                     <Ionicons name="settings-sharp" size={28} color="#FFD700" style={styles.glowIcon} />
                 </TouchableOpacity>
 
-                {/* 2. Notification Icon - Bell with Badge */}
-                <TouchableOpacity style={styles.iconButton}>
+                {/* 2. Notification Icon — navigates to /notifications */}
+                <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => router.push('/notifications' as any)}
+                >
                     <Ionicons name="notifications" size={28} color="#FF9800" style={styles.glowIcon} />
                     {hasNotifications && (
                         <View style={styles.badge}>
-                            <View style={styles.badgeDot} />
+                            <Text style={styles.badgeText}>
+                                {unreadCount > 9 ? '9+' : unreadCount}
+                            </Text>
                         </View>
                     )}
                 </TouchableOpacity>
 
-                {/* 3. Search Icon - Blue/Glassy */}
+                {/* 3. Search Icon */}
                 <TouchableOpacity
                     style={styles.iconButton}
                     onPress={() => router.push('/search')}
@@ -42,7 +49,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ hasNotifications = f
                     <Ionicons name="search" size={28} color="#64B5F6" style={styles.glowIcon} />
                 </TouchableOpacity>
 
-                {/* 4. Profile Picture - Rounded with glow (Default/Empty initially) */}
+                {/* 4. Profile Picture */}
                 <TouchableOpacity
                     style={styles.profileContainer}
                     onPress={() => router.push('/profile')}
@@ -53,7 +60,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ hasNotifications = f
                 </TouchableOpacity>
             </LinearGradient>
 
-            {/* Divider Line */}
+            {/* Divider */}
             <LinearGradient
                 colors={['transparent', '#333', 'transparent']}
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
@@ -77,10 +84,6 @@ const styles = StyleSheet.create({
     },
     iconButton: {
         padding: spacing.xs,
-        shadowColor: "#FFD700",
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 10,
     },
     glowIcon: {
         textShadowColor: 'rgba(255, 255, 255, 0.4)',
@@ -89,28 +92,29 @@ const styles = StyleSheet.create({
     },
     badge: {
         position: 'absolute',
-        top: 2,
-        right: 4,
+        top: 0,
+        right: 0,
         backgroundColor: 'red',
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#000',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingHorizontal: 3,
     },
-    badgeDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: '#FFF'
+    badgeText: {
+        color: '#FFF',
+        fontSize: 9,
+        fontWeight: '800',
+        lineHeight: 11,
     },
     profileContainer: {
         padding: 2,
         borderRadius: 20,
         backgroundColor: '#FFF',
-        shadowColor: "#FFF",
+        shadowColor: '#FFF',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.6,
         shadowRadius: 8,
@@ -131,5 +135,5 @@ const styles = StyleSheet.create({
         height: 1,
         width: '100%',
         opacity: 0.5,
-    }
+    },
 });
