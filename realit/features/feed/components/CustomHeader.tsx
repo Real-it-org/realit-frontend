@@ -28,7 +28,11 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ unreadCount = 0 }) =
                 {/* Right icons */}
                 <View style={styles.rightIcons}>
                     {/* Settings */}
-                    <TouchableOpacity style={styles.iconButton} hitSlop={8}>
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        hitSlop={8}
+                        onPress={() => router.push('/settings' as any)}
+                    >
                         <Ionicons name="settings-outline" size={22} color="#fff" />
                     </TouchableOpacity>
 
