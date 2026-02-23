@@ -1,10 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, Platform, StatusBar, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet, TouchableOpacity, Platform, StatusBar, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-
 import { useRouter } from 'expo-router';
 
 interface CustomHeaderProps {
@@ -17,55 +14,63 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ unreadCount = 0 }) =
 
     return (
         <View style={styles.container}>
-            <LinearGradient
-                colors={['#1a1a1a', '#000000']}
-                style={styles.gradient}
-            >
-                {/* 1. Settings Icon */}
-                <TouchableOpacity style={styles.iconButton}>
-                    <Ionicons name="settings-sharp" size={28} color="#FFD700" style={styles.glowIcon} />
-                </TouchableOpacity>
+            <View style={styles.row}>
+                {/* App Title — left */}
+                <View style={styles.brandRow}>
+                    <Image
+                        source={require('../../../assets/logo/realit_logo.png')}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.title}>Real-it</Text>
+                </View>
 
-                {/* 2. Notification Icon — navigates to /notifications */}
-                <TouchableOpacity
-                    style={styles.iconButton}
-                    onPress={() => router.push('/notifications' as any)}
-                >
-                    <Ionicons name="notifications" size={28} color="#FF9800" style={styles.glowIcon} />
-                    {hasNotifications && (
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>
-                                {unreadCount > 9 ? '9+' : unreadCount}
-                            </Text>
+                {/* Right icons */}
+                <View style={styles.rightIcons}>
+                    {/* Settings */}
+                    <TouchableOpacity style={styles.iconButton} hitSlop={8}>
+                        <Ionicons name="settings-outline" size={22} color="#fff" />
+                    </TouchableOpacity>
+
+                    {/* Notifications */}
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        hitSlop={8}
+                        onPress={() => router.push('/notifications' as any)}
+                    >
+                        <Ionicons name="notifications-outline" size={22} color="#fff" />
+                        {hasNotifications && (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+
+                    {/* Search */}
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        hitSlop={8}
+                        onPress={() => router.push('/search')}
+                    >
+                        <Ionicons name="search-outline" size={22} color="#fff" />
+                    </TouchableOpacity>
+
+                    {/* Profile */}
+                    <TouchableOpacity
+                        style={styles.profileButton}
+                        hitSlop={8}
+                        onPress={() => router.push('/profile')}
+                    >
+                        <View style={styles.avatar}>
+                            <Ionicons name="person-outline" size={16} color="#888" />
                         </View>
-                    )}
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                </View>
+            </View>
 
-                {/* 3. Search Icon */}
-                <TouchableOpacity
-                    style={styles.iconButton}
-                    onPress={() => router.push('/search')}
-                >
-                    <Ionicons name="search" size={28} color="#64B5F6" style={styles.glowIcon} />
-                </TouchableOpacity>
-
-                {/* 4. Profile Picture */}
-                <TouchableOpacity
-                    style={styles.profileContainer}
-                    onPress={() => router.push('/profile')}
-                >
-                    <View style={[styles.profileImage, styles.emptyProfile]}>
-                        <Ionicons name="person" size={20} color="#666" />
-                    </View>
-                </TouchableOpacity>
-            </LinearGradient>
-
-            {/* Divider */}
-            <LinearGradient
-                colors={['transparent', '#333', 'transparent']}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={styles.divider}
-            />
+            <View style={styles.divider} />
         </View>
     );
 };
@@ -73,67 +78,73 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ unreadCount = 0 }) =
 const styles = StyleSheet.create({
     container: {
         width: '100%',
+        backgroundColor: '#000',
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
-    gradient: {
+    row: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: spacing.xl,
-        paddingVertical: spacing.md,
+        justifyContent: 'space-between',
+        paddingHorizontal: spacing.md,
+        paddingVertical: 8,
+    },
+    brandRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    logoImage: {
+        width: 28,
+        height: 28,
+    },
+    title: {
+        color: '#fff',
+        fontSize: 20,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+    },
+    rightIcons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
     },
     iconButton: {
-        padding: spacing.xs,
-    },
-    glowIcon: {
-        textShadowColor: 'rgba(255, 255, 255, 0.4)',
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 10,
+        padding: 6,
     },
     badge: {
         position: 'absolute',
-        top: 0,
-        right: 0,
-        backgroundColor: 'red',
-        minWidth: 16,
-        height: 16,
+        top: 2,
+        right: 2,
+        backgroundColor: '#e53935',
+        minWidth: 15,
+        height: 15,
         borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#000',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 3,
     },
     badgeText: {
-        color: '#FFF',
+        color: '#fff',
         fontSize: 9,
-        fontWeight: '800',
+        fontWeight: '700',
         lineHeight: 11,
     },
-    profileContainer: {
-        padding: 2,
-        borderRadius: 20,
-        backgroundColor: '#FFF',
-        shadowColor: '#FFF',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.6,
-        shadowRadius: 8,
+    profileButton: {
+        padding: 4,
+        marginLeft: 2,
     },
-    profileImage: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-    },
-    emptyProfile: {
-        backgroundColor: '#222',
+    avatar: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#1a1a1a',
+        borderWidth: 1,
+        borderColor: '#333',
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#444',
     },
     divider: {
-        height: 1,
-        width: '100%',
-        opacity: 0.5,
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: '#222',
     },
 });

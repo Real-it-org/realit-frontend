@@ -1,54 +1,65 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+    View,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Platform,
+} from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { GradientButton } from '@/components/GradientButton';
-import { spacing } from '@/theme/spacing';
-
 import { useRouter } from 'expo-router';
+import { colors } from '@/theme/colors';
+
+interface TabItem {
+    key: string;
+    label: string;
+    icon: React.ReactNode;
+    color: string;
+    onPress?: () => void;
+}
 
 export const CustomBottomBar = () => {
     const router = useRouter();
+
+    const tabs: TabItem[] = [
+        {
+            key: 'post',
+            label: 'Post',
+            icon: <MaterialCommunityIcons name="note-edit-outline" size={24} color={colors.buttonPost} />,
+            color: colors.buttonPost,
+        },
+        {
+            key: 'realit',
+            label: 'Real-it',
+            icon: <Ionicons name="checkmark-circle-outline" size={26} color={colors.buttonRealIt} />,
+            color: colors.buttonRealIt,
+            onPress: () => router.push('/camera'),
+        },
+        {
+            key: 'genie',
+            label: 'Genie',
+            icon: <MaterialCommunityIcons name="auto-fix" size={24} color={colors.buttonGenie} />,
+            color: colors.buttonGenie,
+        },
+    ];
+
     return (
         <View style={styles.container}>
-            {/* Background Gradient for the bar itself */}
-            <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.9)', '#000']}
-                style={styles.background}
-            />
-
-            <View style={styles.buttonContainer}>
-                {/* 1. Post Button - Blue/Purple/Silver Gradient */}
-                <View style={styles.buttonWrapper}>
-                    <GradientButton
-                        colors={['#4facfe', '#00f2fe']} // Cyan/Blue
-                        icon={<MaterialCommunityIcons name="note-edit-outline" size={24} color="#FFF" />}
-                        label="Post"
-                        style={styles.button}
-                    />
-                </View>
-
-                {/* 2. Real-it Button - Green/Yellow/Fire Gradient (Center, slightly larger) */}
-                <View style={[styles.buttonWrapper, styles.centerWrapper]}>
-                    <GradientButton
-                        colors={['#43e97b', '#38f9d7']} // Green/Teal
-                        icon={<Ionicons name="eye-outline" size={30} color="#FFF" />}
-                        label="Real-it"
-                        style={styles.button}
-                        labelStyle={{ fontSize: 16 }}
-                        onPress={() => router.push('/camera')}
-                    />
-                </View>
-
-                {/* 3. Genie Button - Purple/Pink/Magic Gradient */}
-                <View style={styles.buttonWrapper}>
-                    <GradientButton
-                        colors={['#667eea', '#764ba2']} // Purple
-                        icon={<MaterialCommunityIcons name="lamp-outline" size={24} color="#FFF" />}
-                        label="Genie"
-                        style={styles.button}
-                    />
-                </View>
+            <View style={styles.bar}>
+                {tabs.map((tab) => (
+                    <TouchableOpacity
+                        key={tab.key}
+                        style={styles.tab}
+                        onPress={tab.onPress}
+                        activeOpacity={0.7}
+                    >
+                        {/* Coloured dot indicator above the active-style icon */}
+                        <View style={[styles.iconDot, { backgroundColor: tab.color + '22' }]}>
+                            {tab.icon}
+                        </View>
+                        <Text style={[styles.label, { color: tab.color }]}>{tab.label}</Text>
+                    </TouchableOpacity>
+                ))}
             </View>
         </View>
     );
@@ -60,34 +71,33 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 100, // Taller to accommodate the buttons
-        justifyContent: 'flex-end',
-        paddingBottom: spacing.lg,
+        backgroundColor: '#000',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: '#222',
+        paddingBottom: Platform.OS === 'ios' ? 16 : 6,
+        paddingTop: 5,
     },
-    background: {
-        ...StyleSheet.absoluteFillObject,
-        top: 20, // Fade starts a bit lower
-    },
-    buttonContainer: {
+    bar: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        alignItems: 'flex-end',
-        paddingHorizontal: spacing.md,
+        alignItems: 'center',
+        paddingHorizontal: 16,
     },
-    buttonWrapper: {
+    tab: {
         flex: 1,
         alignItems: 'center',
+        gap: 4,
     },
-    centerWrapper: {
-        // bottom: 15, // Removed lift to align with other buttons
+    iconDot: {
+        width: 44,
+        height: 34,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    button: {
-        width: '90%',
-        height: 60,
-        borderRadius: 16,
+    label: {
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 0.3,
     },
-    centerButton: {
-        // height: 70, // Removed custom height
-        // borderRadius: 20, 
-    }
 });
