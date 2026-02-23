@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../../theme/colors';
 
@@ -16,6 +16,11 @@ export const SplashScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require('../../../assets/logo/realit_logo.png')}
+        style={styles.logoImage}
+        resizeMode="contain"
+      />
       <Text style={styles.logo}>Real-it</Text>
     </View>
   );
@@ -27,6 +32,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logoImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 12,
   },
   logo: {
     color: colors.textPrimary,
