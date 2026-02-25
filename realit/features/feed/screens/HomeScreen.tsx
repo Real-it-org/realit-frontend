@@ -13,6 +13,8 @@ const MOCK_POSTS = [
     {
         id: '1',
         heading: 'Into the empty land...',
+        username: 'alex_wanderer',
+        postType: 'realit' as const,
         userAvatar: { uri: 'https://i.pravatar.cc/150?img=1' },
         postImage: { uri: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop' },
         likes: 50,
@@ -23,6 +25,8 @@ const MOCK_POSTS = [
     {
         id: '2',
         heading: 'My Goa Trip',
+        username: 'priya_travels',
+        postType: 'post' as const,
         userAvatar: { uri: 'https://i.pravatar.cc/150?img=8' },
         postImage: { uri: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000&auto=format&fit=crop' },
         likes: 12,
@@ -33,6 +37,8 @@ const MOCK_POSTS = [
     {
         id: '3',
         heading: 'Teacher Slapped',
+        username: 'news_daily',
+        postType: 'ai' as const,
         userAvatar: { uri: 'https://i.pravatar.cc/150?img=5' },
         postImage: { uri: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1000&auto=format&fit=crop' },
         likes: 102,
@@ -63,6 +69,8 @@ export const HomeScreen = () => {
     const renderItem = ({ item }: { item: any }) => (
         <FeedPost
             heading={item.heading}
+            username={item.username}
+            postType={item.postType}
             userAvatar={item.userAvatar}
             postImage={item.postImage}
             likes={item.likes}

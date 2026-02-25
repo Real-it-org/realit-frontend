@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { PostTypeBadge, PostType } from './PostTypeBadge';
 
 interface FeedPostProps {
     heading: string;
+    username: string;
+    postType: PostType;
     userAvatar: any; // Can be require() or object with uri
     postImage: any; // Can be require() or object with uri
     likes: number;
@@ -20,6 +23,8 @@ interface FeedPostProps {
 
 export const FeedPost: React.FC<FeedPostProps> = ({
     heading,
+    username,
+    postType,
     userAvatar,
     postImage,
     likes,
@@ -36,8 +41,9 @@ export const FeedPost: React.FC<FeedPostProps> = ({
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.heading}>{heading}</Text>
-                <TouchableOpacity onPress={onAvatarPress}>
+                <TouchableOpacity onPress={onAvatarPress} style={styles.avatarGroup}>
                     <Image source={userAvatar} style={styles.avatar} />
+                    <Text style={styles.username} numberOfLines={1}>{username}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -46,7 +52,7 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                 <Image source={postImage} style={styles.postImage} resizeMode="cover" />
             </View>
 
-            {/* Actions */}
+            {/* Actions + Badge */}
             <View style={styles.actionsContainer}>
                 <TouchableOpacity style={styles.actionItem} onPress={onLikePress}>
                     <FontAwesome5 name="fire" size={24} color="#FF5722" />
@@ -62,6 +68,9 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                     <FontAwesome5 name="comment" size={20} color="#FFF" />
                     <Text style={styles.actionText}>{comments}</Text>
                 </TouchableOpacity>
+
+                <View style={styles.actionSpacer} />
+                <PostTypeBadge type={postType} />
             </View>
 
             {/* Description */}
@@ -75,18 +84,18 @@ export const FeedPost: React.FC<FeedPostProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: '#000000',
-        marginBottom: spacing.lg,
+        marginBottom: spacing.sm,
         borderBottomWidth: 1,
         borderBottomColor: '#333333',
-        paddingBottom: spacing.md,
+        paddingBottom: spacing.sm,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        backgroundColor: 'rgba(0,0,0,0.5)', // Slight background for contrast if needed, but mainly black
+        paddingVertical: 6,
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     heading: {
         color: colors.textPrimary,
@@ -94,12 +103,25 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontFamily: 'serif', // Trying to match the elegant font in the image
     },
+    avatarGroup: {
+        alignItems: 'center',
+        gap: 3,
+    },
     avatar: {
-        width: 30, // Small avatar
+        width: 30,
         height: 30,
         borderRadius: 15,
         borderWidth: 1,
         borderColor: '#FFF',
+    },
+    username: {
+        color: colors.textSecondary,
+        fontSize: 10,
+        fontWeight: '500',
+        maxWidth: 70,
+    },
+    actionSpacer: {
+        flex: 1,
     },
     imageContainer: {
         width: '100%',
