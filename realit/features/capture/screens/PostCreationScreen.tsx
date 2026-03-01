@@ -47,6 +47,7 @@ export default function PostCreationScreen() {
             const createResponse = await postsService.createPost({
                 heading: subject,
                 description: description,
+                verification_status: 'verified',
                 media: mediaItems
             });
 

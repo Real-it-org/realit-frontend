@@ -16,6 +16,7 @@ export interface PostMediaItemDto {
 export interface CreatePostDto {
     heading?: string;
     description?: string;
+    verification_status?: 'verified' | 'ai' | 'unverified';
     media: PostMediaItemDto[];
 }
 
