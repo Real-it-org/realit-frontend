@@ -4,17 +4,25 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { PostTypeBadge, PostType } from './PostTypeBadge';
+import type { FeedPost as FeedPostData } from '@/services/feed/feed.service';
+
+// ── Map backend verification_status → PostType ──────────────────────
+const mapVerificationToPostType = (
+    status: FeedPostData['verification_status'],
+): PostType => {
+    switch (status) {
+        case 'verified':
+            return 'realit';
+        case 'ai':
+            return 'ai';
+        case 'unverified':
+        default:
+            return 'post';
+    }
+};
 
 interface FeedPostProps {
-    heading: string;
-    username: string;
-    postType: PostType;
-    userAvatar: any; // Can be require() or object with uri
-    postImage: any; // Can be require() or object with uri
-    likes: number;
-    shares: number;
-    comments: number;
-    description: string;
+    post: FeedPostData;
     onAvatarPress?: () => void;
     onLikePress?: () => void;
     onSharePress?: () => void;
@@ -22,51 +30,69 @@ interface FeedPostProps {
 }
 
 export const FeedPost: React.FC<FeedPostProps> = ({
-    heading,
-    username,
-    postType,
-    userAvatar,
-    postImage,
-    likes,
-    shares,
-    comments,
-    description,
+    post,
     onAvatarPress,
     onLikePress,
     onSharePress,
     onCommentPress,
 }) => {
+    const postType = mapVerificationToPostType(post.verification_status);
+
+    // Use the first media item as the hero image (if any)
+    const heroMedia = post.media.length > 0 ? post.media[0] : null;
+
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.heading}>{heading}</Text>
+                <Text style={styles.heading} numberOfLines={1}>
+                    {post.heading || ''}
+                </Text>
                 <TouchableOpacity onPress={onAvatarPress} style={styles.avatarGroup}>
-                    <Image source={userAvatar} style={styles.avatar} />
-                    <Text style={styles.username} numberOfLines={1}>{username}</Text>
+                    {post.author.avatar_url ? (
+                        <Image
+                            source={{ uri: post.author.avatar_url }}
+                            style={styles.avatar}
+                        />
+                    ) : (
+                        <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                            <Text style={styles.avatarInitial}>
+                                {(post.author.display_name || post.author.username || '?')[0].toUpperCase()}
+                            </Text>
+                        </View>
+                    )}
+                    <Text style={styles.username} numberOfLines={1}>
+                        {post.author.display_name || post.author.username}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
             {/* Post Image */}
-            <View style={styles.imageContainer}>
-                <Image source={postImage} style={styles.postImage} resizeMode="cover" />
-            </View>
+            {heroMedia && (
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={{ uri: heroMedia.media_url }}
+                        style={styles.postImage}
+                        resizeMode="cover"
+                    />
+                </View>
+            )}
 
             {/* Actions + Badge */}
             <View style={styles.actionsContainer}>
                 <TouchableOpacity style={styles.actionItem} onPress={onLikePress}>
                     <FontAwesome5 name="fire" size={24} color="#FF5722" />
-                    <Text style={styles.actionText}>{likes}</Text>
+                    <Text style={styles.actionText}>{post.likes_count}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionItem} onPress={onSharePress}>
                     <FontAwesome5 name="users" size={20} color="#00C853" />
-                    <Text style={styles.actionText}>{shares}</Text>
+                    <Text style={styles.actionText}>0</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionItem} onPress={onCommentPress}>
                     <FontAwesome5 name="comment" size={20} color="#FFF" />
-                    <Text style={styles.actionText}>{comments}</Text>
+                    <Text style={styles.actionText}>{post.comments_count}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.actionSpacer} />
@@ -74,9 +100,11 @@ export const FeedPost: React.FC<FeedPostProps> = ({
             </View>
 
             {/* Description */}
-            <View style={styles.footer}>
-                <Text style={styles.description}>{description}</Text>
-            </View>
+            {post.description ? (
+                <View style={styles.footer}>
+                    <Text style={styles.description}>{post.description}</Text>
+                </View>
+            ) : null}
         </View>
     );
 };
@@ -99,9 +127,11 @@ const styles = StyleSheet.create({
     },
     heading: {
         color: colors.textPrimary,
-        fontSize: 20, // Slightly large heading
+        fontSize: 20,
         fontWeight: 'bold',
-        fontFamily: 'serif', // Trying to match the elegant font in the image
+        fontFamily: 'serif',
+        flex: 1,
+        marginRight: spacing.sm,
     },
     avatarGroup: {
         alignItems: 'center',
@@ -114,6 +144,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#FFF',
     },
+    avatarPlaceholder: {
+        backgroundColor: '#555',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarInitial: {
+        color: '#FFF',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
     username: {
         color: colors.textSecondary,
         fontSize: 10,
@@ -125,7 +165,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         width: '100%',
-        height: 300, // Fixed height for consistency, or aspect ratio
+        height: 300,
         backgroundColor: '#1a1a1a',
     },
     postImage: {
@@ -137,7 +177,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: spacing.md,
         paddingTop: spacing.sm,
-        gap: spacing.lg, // Space between action groups
+        gap: spacing.lg,
     },
     actionItem: {
         alignItems: 'center',
@@ -155,6 +195,6 @@ const styles = StyleSheet.create({
     description: {
         color: colors.textPrimary,
         fontSize: 14,
-        fontStyle: 'italic', // Matches the vibe in the screenshot
+        fontStyle: 'italic',
     },
 });
