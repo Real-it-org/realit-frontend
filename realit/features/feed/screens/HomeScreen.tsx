@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     Text,
     RefreshControl,
+    ViewToken,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -31,6 +32,18 @@ export const HomeScreen = () => {
 
     // Track if a fetch is already in flight to prevent duplicates
     const fetchingRef = useRef(false);
+
+    // Track which posts are currently visible in the viewport
+    const [visiblePostIds, setVisiblePostIds] = useState<Set<string>>(new Set());
+
+    const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+        const ids = new Set(viewableItems.map((v) => v.item?.id).filter(Boolean) as string[]);
+        setVisiblePostIds(ids);
+    }).current;
+
+    const viewabilityConfig = useRef({
+        itemVisiblePercentThreshold: 50,
+    }).current;
 
     // ── Fetch feed (initial or refresh) ─────────────────────────────
     const fetchFeed = useCallback(async (isRefresh = false) => {
@@ -94,6 +107,7 @@ export const HomeScreen = () => {
     const renderItem = ({ item }: { item: FeedPostData }) => (
         <FeedPost
             post={item}
+            isVisible={visiblePostIds.has(item.id)}
             onLikePress={() => handleLike(item.id)}
             onSharePress={() => handleShare(item.id)}
             onCommentPress={() => handleComment(item.id)}
@@ -144,6 +158,8 @@ export const HomeScreen = () => {
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={renderFooter}
                     ListEmptyComponent={renderEmpty}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    viewabilityConfig={viewabilityConfig}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
