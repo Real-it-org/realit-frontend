@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,10 +6,43 @@ import { spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
 import { postsService, MediaType } from '@/services/posts/posts.service';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import { Alert, ActivityIndicator } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const IMAGE_SIZE = 100;
+
+/**
+ * Renders a thumbnail for an image or video URI.
+ * For videos, generates a thumbnail frame; for images, renders directly.
+ */
+const MediaThumbnail = ({ uri }: { uri: string }) => {
+    const isVideo = uri.endsWith('.mov') || uri.endsWith('.mp4');
+    const [thumbnail, setThumbnail] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isVideo) {
+            VideoThumbnails.getThumbnailAsync(uri, { time: 1000, quality: 0.5 })
+                .then(({ uri: thumbUri }) => setThumbnail(thumbUri))
+                .catch((e) => console.warn('Could not generate thumbnail', e));
+        }
+    }, [uri]);
+
+    return (
+        <View>
+            <Image
+                source={{ uri: isVideo && thumbnail ? thumbnail : uri }}
+                style={styles.thumbnail}
+                resizeMode="cover"
+            />
+            {isVideo && (
+                <View style={styles.videoOverlay}>
+                    <Ionicons name="play-circle" size={32} color="rgba(255,255,255,0.85)" />
+                </View>
+            )}
+        </View>
+    );
+};
 
 export default function PostCreationScreen() {
     const router = useRouter();
@@ -120,7 +153,7 @@ export default function PostCreationScreen() {
                             showsHorizontalScrollIndicator={false}
                             keyExtractor={(item, index) => `${item}-${index}`}
                             renderItem={({ item }) => (
-                                <Image source={{ uri: item }} style={styles.thumbnail} resizeMode="cover" />
+                                <MediaThumbnail uri={item} />
                             )}
                             contentContainerStyle={styles.imageList}
                         />
@@ -216,6 +249,13 @@ const styles = StyleSheet.create({
         height: IMAGE_SIZE * 1.5, // Portrait aspect ratio look
         marginRight: spacing.xs,
         backgroundColor: colors.inputBg,
+        borderRadius: 4,
+    },
+    videoOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.25)',
         borderRadius: 4,
     },
     input: {

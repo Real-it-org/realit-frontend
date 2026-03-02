@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { PostTypeBadge, PostType } from './PostTypeBadge';
@@ -23,14 +24,44 @@ const mapVerificationToPostType = (
 
 interface FeedPostProps {
     post: FeedPostData;
+    isVisible?: boolean;
     onAvatarPress?: () => void;
     onLikePress?: () => void;
     onSharePress?: () => void;
     onCommentPress?: () => void;
 }
 
+/**
+ * Inline video player for feed posts.
+ * Shows native controls with play/pause, seek bar, timestamp, and fullscreen.
+ */
+const HeroVideo = ({ uri, isVisible }: { uri: string; isVisible: boolean }) => {
+    const player = useVideoPlayer(uri, (p) => {
+        p.loop = true;
+    });
+
+    useEffect(() => {
+        if (isVisible) {
+            player.play();
+        } else {
+            player.pause();
+        }
+    }, [isVisible, player]);
+
+    return (
+        <VideoView
+            style={styles.postImage}
+            player={player}
+            nativeControls={true}
+            allowsFullscreen={true}
+            allowsPictureInPicture={true}
+        />
+    );
+};
+
 export const FeedPost: React.FC<FeedPostProps> = ({
     post,
+    isVisible = false,
     onAvatarPress,
     onLikePress,
     onSharePress,
@@ -67,14 +98,18 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                 </TouchableOpacity>
             </View>
 
-            {/* Post Image */}
+            {/* Post Media */}
             {heroMedia && (
                 <View style={styles.imageContainer}>
-                    <Image
-                        source={{ uri: heroMedia.media_url }}
-                        style={styles.postImage}
-                        resizeMode="cover"
-                    />
+                    {heroMedia.media_type === 'video' ? (
+                        <HeroVideo uri={heroMedia.media_url} isVisible={isVisible} />
+                    ) : (
+                        <Image
+                            source={{ uri: heroMedia.media_url }}
+                            style={styles.postImage}
+                            resizeMode="cover"
+                        />
+                    )}
                 </View>
             )}
 

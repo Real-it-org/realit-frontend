@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, Image, StyleSheet, Dimensions, Text } from 'react-native';
 import { PostResponse } from '@/services/profile/types';
 import { spacing } from '@/theme/spacing';
 import { Ionicons } from '@expo/vector-icons';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 
 interface PostGridProps {
     posts: PostResponse[];
@@ -14,6 +15,40 @@ interface PostGridProps {
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 3;
 const ITEM_SIZE = width / COLUMN_COUNT;
+
+/**
+ * Grid media item that handles both images and videos.
+ * For videos, generates a thumbnail from the presigned URL.
+ */
+const GridMediaItem = ({ media }: { media: { media_url: string; media_type: string } }) => {
+    const isVideo = media.media_type === 'VIDEO';
+    const [thumbnail, setThumbnail] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isVideo) {
+            VideoThumbnails.getThumbnailAsync(media.media_url, { time: 1000, quality: 0.5 })
+                .then(({ uri }) => setThumbnail(uri))
+                .catch((e) => console.warn('Could not generate video thumbnail', e));
+        }
+    }, [media.media_url]);
+
+    const displayUri = isVideo ? thumbnail : media.media_url;
+
+    return (
+        <>
+            <Image
+                source={displayUri ? { uri: displayUri } : undefined}
+                style={styles.image}
+                resizeMode="cover"
+            />
+            {isVideo && (
+                <View style={styles.videoIcon}>
+                    <Ionicons name="play" size={16} color="#FFF" />
+                </View>
+            )}
+        </>
+    );
+};
 
 export const PostGrid: React.FC<PostGridProps> = ({
     posts,
@@ -28,16 +63,7 @@ export const PostGrid: React.FC<PostGridProps> = ({
 
         return (
             <View style={styles.itemContainer}>
-                <Image
-                    source={{ uri: firstMedia.media_url }}
-                    style={styles.image}
-                    resizeMode="cover"
-                />
-                {firstMedia.media_type === 'VIDEO' && (
-                    <View style={styles.videoIcon}>
-                        <Ionicons name="play" size={16} color="#FFF" />
-                    </View>
-                )}
+                <GridMediaItem media={firstMedia} />
             </View>
         );
     };
