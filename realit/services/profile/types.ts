@@ -18,7 +18,7 @@ export interface PublicProfileResponse extends ProfileResponse {
 
 export interface PostMedia {
     media_url: string;
-    media_type: 'IMAGE' | 'VIDEO'; // or MediaType enum
+    media_type: 'image' | 'video';
     position: number;
 }
 

@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { useIsFocused } from '@react-navigation/native';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { PostTypeBadge, PostType } from './PostTypeBadge';
 import type { FeedPost as FeedPostData } from '@/services/feed/feed.service';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // ── Map backend verification_status → PostType ──────────────────────
 const mapVerificationToPostType = (
@@ -36,21 +39,44 @@ interface FeedPostProps {
  * Shows native controls with play/pause, seek bar, timestamp, and fullscreen.
  */
 const HeroVideo = ({ uri, isVisible }: { uri: string; isVisible: boolean }) => {
+    const isFocused = useIsFocused();
+    const shouldPlay = isVisible && isFocused;
+
     const player = useVideoPlayer(uri, (p) => {
         p.loop = true;
     });
 
     useEffect(() => {
-        if (isVisible) {
+        if (shouldPlay) {
             player.play();
         } else {
             player.pause();
         }
-    }, [isVisible, player]);
+    }, [shouldPlay, player]);
 
     return (
         <VideoView
             style={styles.postImage}
+            player={player}
+            nativeControls={true}
+            allowsFullscreen={true}
+            allowsPictureInPicture={true}
+        />
+    );
+};
+
+/**
+ * Fullscreen video player shown inside the modal.
+ */
+const FullscreenVideo = ({ uri }: { uri: string }) => {
+    const player = useVideoPlayer(uri, (p) => {
+        p.loop = true;
+        p.play();
+    });
+
+    return (
+        <VideoView
+            style={styles.fullscreenMedia}
             player={player}
             nativeControls={true}
             allowsFullscreen={true}
@@ -68,6 +94,7 @@ export const FeedPost: React.FC<FeedPostProps> = ({
     onCommentPress,
 }) => {
     const postType = mapVerificationToPostType(post.verification_status);
+    const [fullscreenOpen, setFullscreenOpen] = useState(false);
 
     // Use the first media item as the hero image (if any)
     const heroMedia = post.media.length > 0 ? post.media[0] : null;
@@ -98,9 +125,13 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                 </TouchableOpacity>
             </View>
 
-            {/* Post Media */}
+            {/* Post Media — square box, tappable for fullscreen */}
             {heroMedia && (
-                <View style={styles.imageContainer}>
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => setFullscreenOpen(true)}
+                    style={styles.imageContainer}
+                >
                     {heroMedia.media_type === 'video' ? (
                         <HeroVideo uri={heroMedia.media_url} isVisible={isVisible} />
                     ) : (
@@ -110,7 +141,36 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                             resizeMode="cover"
                         />
                     )}
-                </View>
+                </TouchableOpacity>
+            )}
+
+            {/* Fullscreen Modal */}
+            {heroMedia && (
+                <Modal
+                    visible={fullscreenOpen}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setFullscreenOpen(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <TouchableOpacity
+                            style={styles.modalCloseButton}
+                            onPress={() => setFullscreenOpen(false)}
+                        >
+                            <Ionicons name="close-circle" size={36} color="#FFF" />
+                        </TouchableOpacity>
+
+                        {heroMedia.media_type === 'video' ? (
+                            <FullscreenVideo uri={heroMedia.media_url} />
+                        ) : (
+                            <Image
+                                source={{ uri: heroMedia.media_url }}
+                                style={styles.fullscreenMedia}
+                                resizeMode="contain"
+                            />
+                        )}
+                    </View>
+                </Modal>
             )}
 
             {/* Actions + Badge */}
@@ -200,12 +260,29 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         width: '100%',
-        height: 300,
+        aspectRatio: 1,
         backgroundColor: '#1a1a1a',
     },
     postImage: {
         width: '100%',
         height: '100%',
+    },
+    // Fullscreen modal
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalCloseButton: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 20,
+    },
+    fullscreenMedia: {
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT * 0.8,
     },
     actionsContainer: {
         flexDirection: 'row',

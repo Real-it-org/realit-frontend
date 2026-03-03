@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import { profileService } from '@/services/profile/profile.service';
 import { ProfileResponse, PostResponse, PublicProfileResponse } from '@/services/profile/types';
 import { ProfileHeader } from '../components/ProfileHeader';
@@ -12,6 +13,7 @@ interface ProfileScreenProps {
 }
 
 export default function ProfileScreen({ userId }: ProfileScreenProps) {
+    const router = useRouter();
     const [profile, setProfile] = useState<ProfileResponse | PublicProfileResponse | null>(null);
     const [posts, setPosts] = useState<PostResponse[]>([]);
     const [loading, setLoading] = useState(true);
@@ -97,6 +99,27 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
         // 'requested' state: tapping again does nothing (could cancel in future)
     };
 
+    const handlePostPress = (postIndex: number) => {
+        if (!profile) return;
+
+        // Build author info from profile
+        const authorInfo = {
+            profile_id: userId || '',
+            username: profile.username,
+            display_name: profile.display_name,
+            avatar_url: profile.avatar_url,
+        };
+
+        router.push({
+            pathname: '/profile-feed',
+            params: {
+                posts: JSON.stringify(posts),
+                startIndex: String(postIndex),
+                ...authorInfo,
+            },
+        } as any);
+    };
+
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -133,6 +156,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             {isPrivateAndLocked ? (
                 <PostGrid
                     posts={[]}
+                    onPostPress={handlePostPress}
                     ListHeaderComponent={
                         <View>
                             {header}
@@ -143,6 +167,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             ) : (
                 <PostGrid
                     posts={posts}
+                    onPostPress={handlePostPress}
                     ListHeaderComponent={header}
                 />
             )}
