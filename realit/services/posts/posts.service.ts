@@ -76,5 +76,13 @@ export const postsService = {
     confirmPost: async (data: ConfirmPostMediaDto) => {
         const response = await client.post('/post/confirm', data);
         return response.data;
+    },
+
+    /**
+     * Step 4 (optional): Delete a post and all its media
+     */
+    deletePost: async (postId: string) => {
+        const response = await client.delete(`/post/${postId}`);
+        return response.data;
     }
 };

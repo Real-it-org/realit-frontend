@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Dimensions, Alert } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useIsFocused } from '@react-navigation/native';
@@ -28,10 +28,12 @@ const mapVerificationToPostType = (
 interface FeedPostProps {
     post: FeedPostData;
     isVisible?: boolean;
+    isOwnPost?: boolean;
     onAvatarPress?: () => void;
     onLikePress?: () => void;
     onSharePress?: () => void;
     onCommentPress?: () => void;
+    onDeletePress?: () => void;
 }
 
 /**
@@ -88,13 +90,31 @@ const FullscreenVideo = ({ uri }: { uri: string }) => {
 export const FeedPost: React.FC<FeedPostProps> = ({
     post,
     isVisible = false,
+    isOwnPost = false,
     onAvatarPress,
     onLikePress,
     onSharePress,
     onCommentPress,
+    onDeletePress,
 }) => {
     const postType = mapVerificationToPostType(post.verification_status);
     const [fullscreenOpen, setFullscreenOpen] = useState(false);
+
+    // 3-dot menu handler
+    const handleMenuPress = () => {
+        Alert.alert(
+            'Post Options',
+            undefined,
+            [
+                {
+                    text: 'Delete Post',
+                    style: 'destructive',
+                    onPress: onDeletePress,
+                },
+                { text: 'Cancel', style: 'cancel' },
+            ],
+        );
+    };
 
     // Use the first media item as the hero image (if any)
     const heroMedia = post.media.length > 0 ? post.media[0] : null;
@@ -192,6 +212,11 @@ export const FeedPost: React.FC<FeedPostProps> = ({
 
                 <View style={styles.actionSpacer} />
                 <PostTypeBadge type={postType} />
+                {isOwnPost && (
+                    <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton} hitSlop={8}>
+                        <Ionicons name="ellipsis-vertical" size={20} color="#FFF" />
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Description */}
@@ -231,6 +256,9 @@ const styles = StyleSheet.create({
     avatarGroup: {
         alignItems: 'center',
         gap: 3,
+    },
+    menuButton: {
+        padding: 4,
     },
     avatar: {
         width: 30,

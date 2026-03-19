@@ -115,6 +115,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             params: {
                 posts: JSON.stringify(posts),
                 startIndex: String(postIndex),
+                is_own_profile: String(isOwnProfile),
                 ...authorInfo,
             },
         } as any);
