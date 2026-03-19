@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Text,
     ViewToken,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FeedPost } from '@/features/feed/components/FeedPost';
 import type { FeedPost as FeedPostData, FeedPostMedia } from '@/services/feed/feed.service';
 import type { PostResponse } from '@/services/profile/types';
+import { postsService } from '@/services/posts/posts.service';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -49,6 +51,7 @@ export default function ProfileFeedScreen() {
     // Parse route params
     const rawPosts: PostResponse[] = params.posts ? JSON.parse(params.posts as string) : [];
     const startIndex = params.startIndex ? Number(params.startIndex) : 0;
+    const isOwnPost = params.is_own_profile === 'true';
     const authorInfo = {
         profile_id: (params.profile_id as string) || '',
         username: (params.username as string) || '',
@@ -56,8 +59,10 @@ export default function ProfileFeedScreen() {
         avatar_url: (params.avatar_url as string) || null,
     };
 
-    // Map to FeedPost data
-    const feedPosts = rawPosts.map((p) => mapPostToFeedPost(p, authorInfo));
+    // Manage posts as local state so we can remove deleted ones
+    const [feedPosts, setFeedPosts] = useState<FeedPostData[]>(
+        () => rawPosts.map((p) => mapPostToFeedPost(p, authorInfo)),
+    );
 
     // Visibility tracking for video auto-pause
     const [visiblePostIds, setVisiblePostIds] = useState<Set<string>>(new Set());
@@ -71,12 +76,44 @@ export default function ProfileFeedScreen() {
         itemVisiblePercentThreshold: 50,
     }).current;
 
+    const handleDeletePost = (postId: string) => {
+        Alert.alert(
+            'Delete Post?',
+            'This cannot be undone. The post and all its media will be permanently deleted.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await postsService.deletePost(postId);
+                            setFeedPosts((prev) => {
+                                const next = prev.filter((p) => p.id !== postId);
+                                // If no posts left, go back to profile
+                                if (next.length === 0) {
+                                    router.back();
+                                }
+                                return next;
+                            });
+                        } catch (err: any) {
+                            console.error('Failed to delete post:', err);
+                            Alert.alert('Error', err.response?.data?.message || 'Failed to delete post');
+                        }
+                    },
+                },
+            ],
+        );
+    };
+
     const renderItem = useCallback(({ item }: { item: FeedPostData }) => (
         <FeedPost
             post={item}
             isVisible={visiblePostIds.has(item.id)}
+            isOwnPost={isOwnPost}
+            onDeletePress={() => handleDeletePost(item.id)}
         />
-    ), [visiblePostIds]);
+    ), [visiblePostIds, isOwnPost]);
 
     const getItemLayout = useCallback((_: any, index: number) => ({
         length: 400, // approximate post height
