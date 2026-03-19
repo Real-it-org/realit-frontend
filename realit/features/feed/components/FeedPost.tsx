@@ -145,27 +145,28 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                 </TouchableOpacity>
             </View>
 
-            {/* Post Media — square box, tappable for fullscreen */}
-            {heroMedia && (
+            {/* Post Media — square box; images are tappable for fullscreen, videos are not */}
+            {heroMedia && heroMedia.media_type === 'video' && (
+                <View style={styles.imageContainer}>
+                    <HeroVideo uri={heroMedia.media_url} isVisible={isVisible} />
+                </View>
+            )}
+            {heroMedia && heroMedia.media_type !== 'video' && (
                 <TouchableOpacity
                     activeOpacity={0.9}
                     onPress={() => setFullscreenOpen(true)}
                     style={styles.imageContainer}
                 >
-                    {heroMedia.media_type === 'video' ? (
-                        <HeroVideo uri={heroMedia.media_url} isVisible={isVisible} />
-                    ) : (
-                        <Image
-                            source={{ uri: heroMedia.media_url }}
-                            style={styles.postImage}
-                            resizeMode="cover"
-                        />
-                    )}
+                    <Image
+                        source={{ uri: heroMedia.media_url }}
+                        style={styles.postImage}
+                        resizeMode="cover"
+                    />
                 </TouchableOpacity>
             )}
 
-            {/* Fullscreen Modal */}
-            {heroMedia && (
+            {/* Fullscreen Modal — images only (videos handle fullscreen natively) */}
+            {heroMedia && heroMedia.media_type !== 'video' && (
                 <Modal
                     visible={fullscreenOpen}
                     transparent
@@ -180,15 +181,11 @@ export const FeedPost: React.FC<FeedPostProps> = ({
                             <Ionicons name="close-circle" size={36} color="#FFF" />
                         </TouchableOpacity>
 
-                        {heroMedia.media_type === 'video' ? (
-                            <FullscreenVideo uri={heroMedia.media_url} />
-                        ) : (
-                            <Image
-                                source={{ uri: heroMedia.media_url }}
-                                style={styles.fullscreenMedia}
-                                resizeMode="contain"
-                            />
-                        )}
+                        <Image
+                            source={{ uri: heroMedia.media_url }}
+                            style={styles.fullscreenMedia}
+                            resizeMode="contain"
+                        />
                     </View>
                 </Modal>
             )}
