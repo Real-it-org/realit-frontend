@@ -17,6 +17,7 @@ import { CustomBottomBar } from '../components/CustomBottomBar';
 import { usePreventScreenCapture } from '@/hooks/usePreventScreenCapture';
 import { profileService } from '@/services/profile/profile.service';
 import { feedService, FeedPost as FeedPostData } from '@/services/feed/feed.service';
+import { postsService } from '@/services/posts/posts.service';
 
 const FEED_PAGE_SIZE = 10;
 
@@ -100,7 +101,38 @@ export const HomeScreen = () => {
     );
 
     // ── Handlers ────────────────────────────────────────────────────
-    const handleLike = (id: string) => console.log('Like', id);
+    const handleLike = async (id: string) => {
+        // Optimistic update
+        setPosts((prev) =>
+            prev.map((p) =>
+                p.id === id
+                    ? {
+                        ...p,
+                        is_liked: !p.is_liked,
+                        likes_count: p.is_liked ? p.likes_count - 1 : p.likes_count + 1,
+                    }
+                    : p,
+            ),
+        );
+
+        try {
+            await postsService.toggleLike(id);
+        } catch (error) {
+            // Rollback on failure
+            console.error('Failed to toggle like:', error);
+            setPosts((prev) =>
+                prev.map((p) =>
+                    p.id === id
+                        ? {
+                            ...p,
+                            is_liked: !p.is_liked,
+                            likes_count: p.is_liked ? p.likes_count - 1 : p.likes_count + 1,
+                        }
+                        : p,
+                ),
+            );
+        }
+    };
     const handleShare = (id: string) => console.log('Share', id);
     const handleComment = (id: string) => console.log('Comment', id);
 

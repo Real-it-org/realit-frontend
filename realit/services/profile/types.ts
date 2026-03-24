@@ -31,6 +31,7 @@ export interface PostResponse {
     likes_count: number;
     comments_count: number;
     created_at: string;
+    is_liked?: boolean;
 }
 
 export interface PaginationQuery {

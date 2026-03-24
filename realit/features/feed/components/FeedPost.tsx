@@ -193,7 +193,12 @@ export const FeedPost: React.FC<FeedPostProps> = ({
             {/* Actions + Badge */}
             <View style={styles.actionsContainer}>
                 <TouchableOpacity style={styles.actionItem} onPress={onLikePress}>
-                    <FontAwesome5 name="fire" size={24} color="#FF5722" />
+                    <FontAwesome5
+                        name="fire"
+                        size={24}
+                        color={post.is_liked ? '#FF5722' : '#888'}
+                        solid={post.is_liked}
+                    />
                     <Text style={styles.actionText}>{post.likes_count}</Text>
                 </TouchableOpacity>
 
