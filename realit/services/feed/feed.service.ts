@@ -25,6 +25,7 @@ export interface FeedPost {
     comments_count: number;
     created_at: string;
     author: FeedPostAuthor;
+    is_liked: boolean;
 }
 
 export interface FeedQuery {

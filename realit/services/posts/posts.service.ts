@@ -84,5 +84,14 @@ export const postsService = {
     deletePost: async (postId: string) => {
         const response = await client.delete(`/post/${postId}`);
         return response.data;
-    }
+    },
+
+    /**
+     * Toggle like/unlike on a post.
+     * Returns { liked: boolean, likes_count: number }
+     */
+    toggleLike: async (postId: string): Promise<{ liked: boolean; likes_count: number }> => {
+        const response = await client.post<{ liked: boolean; likes_count: number }>(`/post/${postId}/like`);
+        return response.data;
+    },
 };

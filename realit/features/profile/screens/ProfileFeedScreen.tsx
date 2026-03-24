@@ -41,6 +41,7 @@ function mapPostToFeedPost(
         comments_count: post.comments_count,
         created_at: post.created_at,
         author,
+        is_liked: post.is_liked ?? false,
     };
 }
 
@@ -106,11 +107,45 @@ export default function ProfileFeedScreen() {
         );
     };
 
+    const handleLike = async (postId: string) => {
+        // Optimistic update
+        setFeedPosts((prev) =>
+            prev.map((p) =>
+                p.id === postId
+                    ? {
+                        ...p,
+                        is_liked: !p.is_liked,
+                        likes_count: p.is_liked ? p.likes_count - 1 : p.likes_count + 1,
+                    }
+                    : p,
+            ),
+        );
+
+        try {
+            await postsService.toggleLike(postId);
+        } catch (error) {
+            // Rollback on failure
+            console.error('Failed to toggle like:', error);
+            setFeedPosts((prev) =>
+                prev.map((p) =>
+                    p.id === postId
+                        ? {
+                            ...p,
+                            is_liked: !p.is_liked,
+                            likes_count: p.is_liked ? p.likes_count - 1 : p.likes_count + 1,
+                        }
+                        : p,
+                ),
+            );
+        }
+    };
+
     const renderItem = useCallback(({ item }: { item: FeedPostData }) => (
         <FeedPost
             post={item}
             isVisible={visiblePostIds.has(item.id)}
             isOwnPost={isOwnPost}
+            onLikePress={() => handleLike(item.id)}
             onDeletePress={() => handleDeletePost(item.id)}
         />
     ), [visiblePostIds, isOwnPost]);
